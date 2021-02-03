@@ -17,7 +17,11 @@ print(df.head(10))
 print(df.shape)
 date_time = pd.to_datetime(df['Date'])
 df['Date'] = date_time
-df.set_index('Date', inplace=True)
+
+df['Week Number'] = df['Date'].apply(lambda x: x.isocalendar()[1])
+
+
+#df.set_index('Date', inplace=True)
 print(df.head(10))
 w_moving_Avg = df['Close'].rolling(7).mean()
 m_moving_Avg = df['Close'].rolling(30).mean()
@@ -116,3 +120,35 @@ season = seasonal_decompose(boxcox_transform, period=30)
 fig = season.plot()
 fig.set_size_inches(16, 8)
 plt.show()
+
+#### Moving Average Smoothness ####
+mv_rolling_7 = df['Close'].rolling(7).mean()
+fig = plt.figure(figsize=(8.5, 8.5))
+ax = fig.add_subplot(3, 1, 1)
+mv_rolling_7.plot(ax=ax)
+ax.set_title("Weekly Moving Average")
+ax = fig.add_subplot(3, 1, 2)
+df['Close'].plot(ax=ax, color='r')
+ax.set_title('Original Series')
+
+### Centered Moving Average Smothness ###
+mv_7_centered = df['Close'].rolling(7, center=True).mean()
+ax = fig.add_subplot(3, 1, 3)
+mv_7_centered.plot(ax=ax)
+ax.set_title("Weekly Moving Average Centered")
+plt.show()
+
+df['Residuals'] = df['Close'] - mv_rolling_7
+print(df.head(20))
+x = autocorrelation_plot(df['Residuals'])
+x.plot()
+plt.show()
+
+### Seasonal Component #####
+
+weekwise_avg = df['residuals'].groupby(['Week Number']).mean()
+weeksInYear = df['Week Number'].max()
+numberOfWeeks = round((df['Date'].iloc[[-1]] - df['Date'].iloc[[0]])/7)
+seasonalComp = np.array([weekwise_avg.as_matrix()] *
+                        weeksInYear).reshape((weeksInYear*numberOfWeeks,))
+# TODO Plots decompose panel
