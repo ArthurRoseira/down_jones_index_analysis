@@ -152,3 +152,4 @@ numberOfWeeks = round((df['Date'].iloc[[-1]] - df['Date'].iloc[[0]])/7)
 seasonalComp = np.array([weekwise_avg.as_matrix()] *
                         weeksInYear).reshape((weeksInYear*numberOfWeeks,))
 # TODO Plots decompose panel
+# https: // stackoverflow.com/questions/27541290/bug-of-autocorrelation-plot-in-matplotlib-s-plt-acorr
