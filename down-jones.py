@@ -138,18 +138,26 @@ mv_7_centered.plot(ax=ax)
 ax.set_title("Weekly Moving Average Centered")
 plt.show()
 
-df['Residuals'] = df['Close'] - mv_rolling_7
-print(df.head(20))
-x = autocorrelation_plot(df['Residuals'])
+#####
+mv_7_centered.plot()
+df['Close'].plot()
+plt.show()
+
+residuals = df['Close'] - mv_rolling_7
+df_residuals = pd.concat([df['Week Number'], residuals], axis=1)
+df_residuals.columns = ['Week Number', 'Residuals']
+df_residuals = df_residuals.dropna()
+print(df_residuals.head(20))
+x = autocorrelation_plot(df_residuals['Residuals'])
 x.plot()
 plt.show()
 
 ### Seasonal Component #####
 
-weekwise_avg = df['residuals'].groupby(['Week Number']).mean()
-weeksInYear = df['Week Number'].max()
-numberOfWeeks = round((df['Date'].iloc[[-1]] - df['Date'].iloc[[0]])/7)
-seasonalComp = np.array([weekwise_avg.as_matrix()] *
+weekwise_avg = df_residuals.groupby(['Week Number']).mean()
+weeksInYear = df_residuals['Week Number'].max()
+numberOfWeeks = 52
+seasonalComp = np.array([weekwise_avg.to_numpy()] *
                         weeksInYear).reshape((weeksInYear*numberOfWeeks,))
-# TODO Plots decompose panel
-# https: // stackoverflow.com/questions/27541290/bug-of-autocorrelation-plot-in-matplotlib-s-plt-acorr
+pd.DataFrame(seasonalComp).plot()
+plt.show()
